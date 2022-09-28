@@ -457,6 +457,9 @@ class AvatarManager {
     }
   
     updateLOD() {//每一帧执行一次
+      // if(document.getElementById("number").innerHTML!=="")
+      //   return 
+        
       if (this.lodFinished[3]==false) return;//记录数据的加载情况
   
       // const minFinishedLOD = 
@@ -510,6 +513,21 @@ class AvatarManager {
       //     lodCount.male[3] + lodCount.female[3],
       // };
       // console.log(window.lod_count)
+
+      // document.getElementById("number").innerHTML="同屏人数:"+ 
+      // (lodCount.male[0] + lodCount.female[0])+","+  //高模
+      // (lodCount.male[1] + lodCount.female[1])+","+  //中模
+      // (lodCount.male[2] + lodCount.female[2])+","+ //低模
+      // (lodCount.male[3] + lodCount.female[3]) //超低模
+      
+      // +(
+      //     lodCount.male[0] + lodCount.female[0]+
+      //     lodCount.male[1] + lodCount.female[1]+
+      //     lodCount.male[2] + lodCount.female[2]+
+      //     lodCount.male[3] + lodCount.female[3]
+      // )
+
+      // console.log(document.getElementById("number").innerHTML)
   
       return [//这个返回结果是三级LOD的人数，没有特别的作用
         lodCount.male[0] + lodCount.female[0], //高模
@@ -802,21 +820,32 @@ class AvatarManager {
       //     scope.manager.instanceGroup.female[0].uniforms.textureData;
       //   })
       // })
-
-      maleInstanceGroup.updateTexture("assets/crowd/texture/maleTextureHigh.webp",()=>{
+      
+      
+      var maleTexturePath="assets/crowd/texture/maleTextureHigh"
+      if(window.isIOS)maleTexturePath+="IOS"
+      maleInstanceGroup.updateTexture(maleTexturePath+".webp",()=>{
         // textureData.flipY = false;
         // scope.manager.instanceGroup.female[1].uniforms.textureData={ value: textureData };
-        scope.manager.instanceGroup.male[3].uniforms.textureData=
+        // scope.manager.instanceGroup.male[3].uniforms.textureData=
         scope.manager.instanceGroup.male[2].uniforms.textureData=
         scope.manager.instanceGroup.male[1].uniforms.textureData=
         scope.manager.instanceGroup.male[0].uniforms.textureData;
-        femaleInstanceGroup.updateTexture("assets/crowd/texture/femaleTextureHigh.webp",()=>{
-          scope.manager.instanceGroup.female[3].uniforms.textureData=
+        // alert("男性贴图加载完成")
+
+        var femaleTexturePath="assets/crowd/texture/femaleTextureHigh"
+        if(window.isIOS)femaleTexturePath+="IOS"
+        femaleInstanceGroup.updateTexture(femaleTexturePath+".webp",()=>{
+          // scope.manager.instanceGroup.female[3].uniforms.textureData=
           scope.manager.instanceGroup.female[2].uniforms.textureData=
           scope.manager.instanceGroup.female[1].uniforms.textureData=
           scope.manager.instanceGroup.female[0].uniforms.textureData;
+          // alert("女性贴图加载完成")
         })
       })
+
+      
+      
 
 
 

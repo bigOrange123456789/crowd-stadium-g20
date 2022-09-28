@@ -357,14 +357,11 @@ class GLTFLoader extends Loader {
 		const json = JSON.parse( content );
 
 		if ( json.asset === undefined || json.asset.version[ 0 ] < 2 ) {
-
 			if ( onError ) onError( new Error( 'THREE.GLTFLoader: Unsupported asset. glTF versions >=2.0 are supported.' ) );
 			return;
-
 		}
 
 		const parser = new GLTFParser( json, {
-
 			path: path || this.resourcePath || '',
 			crossOrigin: this.crossOrigin,
 			requestHeader: this.requestHeader,

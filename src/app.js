@@ -1,7 +1,12 @@
 import { Viewer } from './viewer.js';
 
 var dialog = require('art-dialog');
-
+function iswap() {
+  var u = navigator.userAgent;
+  var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+  window.isIOS=isiOS
+}
+iswap()
 class App
 {
   constructor (el) 

@@ -236,6 +236,19 @@ export class VrSpace {
                       node.material.map.needsUpdate = true
 
                     }
+                    if(node.name=="bowl_red_02"){
+                       node.visible=false
+                    }
+                    if(node.name=="bowl_red_01"){
+                      node.visible=false
+                    }
+                    if(node.name=="red_top"){
+                      node.visible=false
+                    }
+                    if(node.name=="large_sign"){
+                      node.visible=false
+                    }
+
                     if (node.name == "red_top") {
                       _self.groups.push(node)
                     }

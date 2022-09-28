@@ -9,9 +9,21 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/button.css" />
   <script src="src/app.js"></script>
+  <style>
+    #number {
+				color: #fff;
+				font-size: 20px;
+				font-weight: normal;
+				position: fixed;
+				left: 0px;
+				top: 25px;
+        z-index:10;
+			}
+  </style>
 </head>
 
 <body>
+  <h1 id="number"></h1>
   <video id="video" loop crossorigin="anonymous" x5-playsinline="" webkit-playsinline="" playsinline="" poster=""
     x-webkit-airplay="allow" style="display: none" muted>
     <source src="assets/mp3/Site-Visit-2nd-Sherpa-G20_1_1.mp4" type="video/mp4; " />
@@ -25,20 +37,31 @@
     <button>背景音</button>
   </div>
   <script>
-    document.documentElement.style.fontSize =
-      (20 * document.documentElement.clientWidth) / 375 + "px";
+
+    // console.error0=console.error
+    // console.error=(err)=>{
+    //   console.error0(err)
+    //   var str=JSON.stringify(
+    //     err//data//scope.viewPointData[b.myId] 
+    //     , null, "\t")
+    //   var link = document.createElement('a');
+    //   link.style.display = 'none';
+    //   document.body.appendChild(link);
+    //   link.href = URL.createObjectURL(new Blob([str], { type: 'text/plain' }));
+    //   link.download ="err.txt";
+    //   link.click();
+    // }
+
+    document.documentElement.style.fontSize =(20 * document.documentElement.clientWidth) / 375 + "px";
     window.onresize = function () {
-      document.documentElement.style.fontSize =
-        (20 * document.documentElement.clientWidth) / 375 + "px";
-    };
+      document.documentElement.style.fontSize =(20 * document.documentElement.clientWidth) / 375 + "px"
+    }
     let btns = document.querySelectorAll("button");
     btns.forEach((item, index) => {
       item.addEventListener("click", () => {
         console.log(index);
         switch (index) {
-          case 0:
-            //漫游
-            break;
+          case 0:break;//漫游
           case 1:
             //热点1
             break;
