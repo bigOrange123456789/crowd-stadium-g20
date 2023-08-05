@@ -114,12 +114,12 @@ vec3 blinnPhong( // 光照模型
     // }
 
     // Specular  公式: (n·(v+l)/|v+l|)^g
-    float specular = pow(max(0., dot(normalize(viewDirection + lightDirection), normalDirection)), material.gloss);
+    float specular = pow(max(0., dot(normalize(viewDirection + lightDirection), normalDirection)), material.gloss);//高光颜色是白色？
 
     return (
-        material.kAmbient * ambient +
-        material.kDiffuse * diffuse +
-        material.kSpecular * specular
+        material.kAmbient * ambient +   //vec3
+        material.kDiffuse * diffuse +   //vec3
+        material.kSpecular * specular   //float
     );
 
 }

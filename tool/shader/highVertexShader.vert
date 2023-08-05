@@ -23,7 +23,6 @@ out vec3 outPosition;
 out vec3 myPosition;//化身的位置
 
 float getBoneScale(float bone) { // 身体形变
-
     if ( bone < 3.5 || (bone > 5.5 && bone < 6.5) || (bone > 15.5 && bone < 16.5) ) // 身体
         return bodyScale[0];
     if ( bone > 3.5 && bone < 5.5 ) // 头部
@@ -32,7 +31,6 @@ float getBoneScale(float bone) { // 身体形变
         return bodyScale[2];
     if ( bone > 25.5 ) // 下肢
         return bodyScale[3];
-    
 }
 
 float computeBodyScale() {

@@ -27,6 +27,9 @@ import { SeatManager } from './avatar/SeatManager.js'
 import { GLTFLoader } from './lib/GLTFLoaderEx'
 import { ZipLoader } from '../lib/ziploader'
 import { MMOPlayer } from './network/MMOPlayer'
+import { MoveManager } from './PlayerControl/MoveManager'
+import { PlayerControl } from './PlayerControl/PlayerControl.js'
+import { Blur } from './Blur.js'
 
 const TWEEN = require("@tweenjs/tween.js").default;
 
@@ -74,11 +77,34 @@ export class Viewer {
     var _self = this
 
     /**************************************************************/
-    this.setCamera()        //设置摄像机
+    let video = document.getElementById('video');
+    let audio = document.getElementById('audio');
+    this.isWander = true          //漫游
+    this.isPlayVideo = true//false      //播放视频
+    this.isPlayAudio = false      //播放音频
+    // _self.activeCamera.position.set(-38.04,6.25,55.46)
+    // _self.activeCamera.rotation.set(-0.01195,-0.62332,-0.00697)
+    
+    // new PlayerControl(this.activeCamera);
+    this.addVrSpace() //添加场景
     this.addSpectators()    //体育场观众
-    this.addVrSpace()
-    this.addPlayer()
-
+    this.addPlayer() //添加相机控制
+    
+    
+    this.autoMove=this.wander2()
+    new Blur(()=>{
+      // var myVideoManager = new VideoManager();
+      // myVideoManager.init();
+      // myVideoManager.setPlay()
+      // scope.createUI()
+      // scope.preview()
+      document.getElementsByClassName("buttonContainer")[0].style.visibility="visible";
+      this.autoMove.stopFlag = false;
+      video.play()
+      audio.play()
+      _self.isPlayAudio = true
+    })
+    
 
 
     this.playerMovement = new Vector4(0.0, 0.0, 0.0, 0.0)
@@ -126,22 +152,17 @@ export class Viewer {
         _self.playerMovement.w = 0.0
       }
       if (event.keyCode == 32) {
-
       }
     }
-
-    this.isWander = true          //漫游
-    this.isPlayVideo = false      //播放视频
-    this.isPlayAudio = false      //播放音频
-    let video = document.getElementById('video');
-    let audio = document.getElementById('audio');
+    
     let btns = document.querySelectorAll("button");
     btns.forEach((item, index) => {
-      item.addEventListener("click", () => {
+      item.addEventListener("click", () => {//按钮点击事件的检测
         switch (index) {
-          case 0:
-            _self.Wander(_self.isWander)
-            _self.isWander = !_self.isWander
+          case 0://开始进行漫游
+            _self.autoMove.stopFlag=!_self.autoMove.stopFlag
+            // _self.Wander(_self.isWander)
+            // _self.isWander = !_self.isWander//是否进行漫游
             break;
           case 1:
             _self.SetView(1)
@@ -322,28 +343,30 @@ export class Viewer {
     if (this.avatarManager) {
       let lodinfo = this.avatarManager.updateLOD()
     }
-
-    if (this.mainPlayer) {
-      this.mainPlayer.UpdateMovement(
-        delta,
-        this.playerMovement,
-        this.vrSpace.collider
-      )
-    }
-    if (this.count > 0) {
-      this.mainPlayer.SetView(new Vector3(0, 0, 23), new Vector3(0, 0, 25))
-      this.count++
-      if (this.count == 3) {
-        this.count = 0
+    if(this.autoMove.stopFlag){//自动漫游的时候禁止用户控制相机
+      if (this.mainPlayer) {
+        this.mainPlayer.UpdateMovement(
+          delta,
+          this.playerMovement,
+          this.vrSpace.collider
+        )
+      }
+      if (this.count > 0) {
+        this.mainPlayer.SetView(new Vector3(0, 0, 23), new Vector3(0, 0, 25))
+        this.count++
+        if (this.count == 3) {
+          this.count = 0
+        }
+      }
+      else if (this.count < 0) {
+        this.mainPlayer.SetView(new Vector3(-10, 0, 0), new Vector3(-12, 0, 0))
+        this.count--
+        if (this.count == -3) {
+          this.count = 0
+        }
       }
     }
-    else if (this.count < 0) {
-      this.mainPlayer.SetView(new Vector3(-10, 0, 0), new Vector3(-12, 0, 0))
-      this.count--
-      if (this.count == -3) {
-        this.count = 0
-      }
-    }
+    
     TWEEN.update()
   }
 
@@ -368,12 +391,6 @@ export class Viewer {
         this.vrSpace.AddStadium()
         break
     }
-  }
-
-  setCamera() {
-    this.defaultCamera.position.copy(new Vector3(80, 80, 80))
-    this.defaultCamera.lookAt(new Vector3())
-    this.activeCamera = this.defaultCamera
   }
 
   async addSpectators() {
@@ -408,6 +425,8 @@ export class Viewer {
                 camera: self.activeCamera,
                 renderer: self.renderer
               })
+              // self.activeCamera.position.set(-38.04,6.25,55.46)
+              // self.activeCamera.rotation.set(-0.01195,-0.62332,-0.00697)
             })
           });
         }
@@ -473,37 +492,63 @@ export class Viewer {
     const vec = new Vector3(x1, y1, 0.5)
     return vec.unproject(this.activeCamera)
   }
-  Wander(bool) {
-    if (bool == true) {
-      this.controls = this.mainPlayer.GetControls(false)
-      this.controls.saveState()
-      this.controls.enableZoom = true
-      this.controls.enablePan = true
-      this.controls.rotateSpeed = 1;
-      let p1 = new Vector3(-31.785184004250954, 1.786182905274199, 52.68140553300441)
-      let p2 = new Vector3(31.755517229404916, 1.786182905274199, 52.70747814795368)
-      let p3 = new Vector3(31.88208891410038, 1.786182905274199, -52.58524063913275)
-      let p4 = new Vector3(-31.72686587407099, 1.786182905274199, -52.727687972212905)
-      let t1 = new Vector3(-31.146574335677084, 1.786182905274199, 51.95305940092583)
-      let t2 = new Vector3(31.146574335677084, 1.786182905274199, 51.95305940092583)
-      let t3 = new Vector3(31.146574335677084, 1.786182905274199, -51.95305940092583)
-      let t4 = new Vector3(-31.146574335677084, 1.786182905274199, -51.95305940092583)
-      this.animateCamera(p1, p2, t1, t2, 5000 * 2, 1)
-      this.animateCamera(p2, p3, t2, t3, 5000 * 2, 1)
-      this.animateCamera(p3, p4, t3, t4, 5000 * 2, 1)
-      this.animateCamera(p4, p1, t4, t1, 5000 * 2, 1)
-      this.tween.chain(this.startTween)
+  // Wander(bool) {
+  //   if (bool == true) {
+  //     this.controls = this.mainPlayer.GetControls(false)
+  //     this.controls.saveState()
+  //     this.controls.enableZoom = true
+  //     this.controls.enablePan = true
+  //     this.controls.rotateSpeed = 1;
+  //     let p1 = new Vector3(-31.785184004250954, 1.786182905274199, 52.68140553300441)
+  //     let p2 = new Vector3(31.755517229404916, 1.786182905274199, 52.70747814795368)
+  //     let p3 = new Vector3(31.88208891410038, 1.786182905274199, -52.58524063913275)
+  //     let p4 = new Vector3(-31.72686587407099, 1.786182905274199, -52.727687972212905)
+  //     let t1 = new Vector3(-31.146574335677084, 1.786182905274199, 51.95305940092583)
+  //     let t2 = new Vector3(31.146574335677084, 1.786182905274199, 51.95305940092583)
+  //     let t3 = new Vector3(31.146574335677084, 1.786182905274199, -51.95305940092583)
+  //     let t4 = new Vector3(-31.146574335677084, 1.786182905274199, -51.95305940092583)
+  //     this.animateCamera(p1, p2, t1, t2, 5000 * 2, 1)
+  //     this.animateCamera(p2, p3, t2, t3, 5000 * 2, 1)
+  //     this.animateCamera(p3, p4, t3, t4, 5000 * 2, 1)
+  //     this.animateCamera(p4, p1, t4, t1, 5000 * 2, 1)
+  //     this.tween.chain(this.startTween)
+  //   }
+  //   else {
+  //     TWEEN.removeAll();
+  //     this.tween = null;
+  //     this.controls = this.mainPlayer.GetControls(true)
+  //     this.controls.reset()
+  //     this.controls.enableZoom = false
+  //     this.controls.enablePan = false
+  //     this.controls.rotateSpeed = 0.2;
+  //   }
+
+  // }
+  wander2() {
+    this.camera=this.activeCamera
+    let movePath = [
+      ,[-14.41,6.41,54.32,-2.72136,0.00159,3.14088,200]
+      ,[22.97,3.44,59.34,-2.79166,0.00164,3.14099,700]
+      
+      ,[40.07,4.36,57.78,-0.31993,-0.58416,-0.18073,300]
+      ,[37.08,6.75,-55.9,-0.31993,-0.58416,-0.18073,1400]
+      ,[-31.42,8,-38.82,-2.1859,1.39718,2.19304,350]
+      ,[-37.72,5.75,47.94,-2.18567,1.10707,2.23914,500]
+      ,[-38.04,6.25,55.46,-0.01195,-0.62332,-0.00697,100]
+
+    ];
+
+    let funcArr = new Array( movePath.length );
+    // funcArr[3] = function() { scope.avatarManager.playAudio(); }
+    funcArr[ movePath.length - 1 ] = function() {
+        // if ( scope.avatarManager.manager.host.audio.isPlaying ) {
+        //     scope.avatarManager.manager.host.cb = scope.roomManager.playVideo;
+        // }
+        // else scope.roomManager.playVideo();
     }
-    else {
-      TWEEN.removeAll();
-      this.tween = null;
-      this.controls = this.mainPlayer.GetControls(true)
-      this.controls.reset()
-      this.controls.enableZoom = false
-      this.controls.enablePan = false
-      this.controls.rotateSpeed = 0.2;
-    }
-  }
+    return new MoveManager(this.camera, movePath, funcArr);
+
+}
   animateCamera(current1, current2, target1, target2, time, flag, cb) {
     //   if (this.operating) return false;
     //   this.operating = true;
@@ -567,6 +612,7 @@ export class Viewer {
     }
   }
   SetView(bool) {
+    this.autoMove.stopFlag=true
     if (bool == 1)
       this.count++;
     else if (bool == 2) {

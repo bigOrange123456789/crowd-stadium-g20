@@ -72,6 +72,7 @@ class SeatManager {
                 // }
             }
         }
+        console.log(this.positions.length)
 
 
 

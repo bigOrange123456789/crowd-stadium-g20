@@ -9,7 +9,7 @@
   HalfFloatType,
   Object3D
 } from 'three'
-
+import * as THREE from "three";
 
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 import { GLTFLoader } from './lib/GLTFLoaderEx'
@@ -153,7 +153,7 @@ export class VrSpace {
     })
   }
 
-  AddStadium() {
+  AddStadium(number) {
     var _self = this
 
     this.url = "assets/models/room_split/";
@@ -179,11 +179,21 @@ export class VrSpace {
         });
       }
     }, 500)
+    
     let video = document.getElementById('video');
     let texture = new VideoTexture(video);
     texture.flipY = false
+    let vrSceneUrl = null
 
-    var vrSceneUrl = 'assets/models/gym/Stadium_002.zip'
+
+
+    if (number == 0) {
+      vrSceneUrl = 'assets/models/gym/Stadium_00(3).zip'
+    }
+    else {
+      vrSceneUrl = 'assets/models/gym/Stadium_00(3).zip'
+    }
+    
     new Promise(function (resolve, reject) {
       var loadingManager = new LoadingManager()
       //loadingManager.setURLModifier('')
@@ -203,7 +213,6 @@ export class VrSpace {
         }).then(function (congigJson) {
           const loader = new GLTFLoader(loadingManager)
           loader.setCrossOrigin('anonymous')
-          loader.setAsyncLightMap(true, 3, 0, 6.0)
           const dracoLoader = new DRACOLoader();
           dracoLoader.setDecoderPath('lib/draco/')
           loader.load(
@@ -213,6 +222,74 @@ export class VrSpace {
               _self.scene.add(scene)
               _self.room.visible = false
               scene.updateMatrixWorld(true)
+              ///////////////////////////////////////////////////////
+              console.log("scene",scene)
+              let camera=window.c
+              let canvas=document.getElementsByTagName("canvas")[0]
+              let arr=[]
+              scene.traverse(mesh=>{
+                if(mesh instanceof THREE.Mesh){
+                  arr.push(mesh)
+                }
+              })
+              function getCanvasRelativePosition(event) {// 计算 以画布 开始为（0，0）点 的鼠标坐标
+                const rect = canvas.getBoundingClientRect()
+                return {
+                  x: ((event.clientX - rect.left) * canvas.width) / rect.width,
+                  y: ((event.clientY - rect.top) * canvas.height) / rect.height
+                }
+              }
+              function setPickPosition(event) {//获取鼠标在three.js 中归一化坐标
+                let pickPosition = { x: 0, y: 0 }// 计算后 以画布 开始为 （0，0）点
+                const pos = getCanvasRelativePosition(event)
+                // 数据归一化
+                pickPosition.x = (pos.x / canvas.width) * 2 - 1
+                pickPosition.y = (pos.y / canvas.height) * -2 + 1
+                return pickPosition
+              }
+              // 监听鼠标
+              // window.addEventListener('mousemove', onRay2)
+              window.addEventListener('mousedown', onRay)
+              function onRay(event) {
+                let pickPosition = setPickPosition(event)
+                const raycaster = new THREE.Raycaster()
+                raycaster.setFromCamera(pickPosition, camera)
+                // 计算物体和射线的交点
+                const intersects = raycaster.intersectObjects(arr, true)
+                // 数组大于0 表示有相交对象
+                if (intersects.length > 0) {
+                  let mesh=intersects[0].object
+                  let z=intersects[0].point.z
+                  let index=Math.floor((z+45.5)/4.65)
+                  let countryNames=(
+                    "China, Brazil, Japan, Italy, Indonesia, Argentina, South Korea, the European Union, Canada, Russia, Germany, India, the United States, France, Saudi Arabia, Turkey, the Republic of South Africa, the United Kingdom, Mexico, Australia"
+                    ).split(",")
+                  // console.log("countryNames",countryNames)
+                  if(intersects[0].point.x<0){
+                    index=19-index
+                  }
+                  if(mesh.name=="guoqi"||mesh.name=="guoqi_"||mesh.name=="guoqi_(1)"){
+                    window.open(
+                      // "https://www.semanticscholar.org/search?q="+countryNames[index].split()[0]
+                      "https://en.wikipedia.org/wiki/"+countryNames[index].split()[0]
+                    )
+                    // location.href=("https://www.semanticscholar.org/search?q="+countryNames[index].split()[0])
+                  }else if(mesh.name=="red_top"){
+                    window.open("https://bafybeias4vylaolmcbdatcdq3hwfvv5ckviqkr4jy6gx5nabesjd2l74iq.ipfs.nftstorage.link/")
+                  }
+                  
+                  console.log(mesh.name,index,intersects[0].point)
+                } 
+              }//onRay(event)
+              for(let i=0;i<arr.length;i++){
+                let mesh=arr[i]
+                if(mesh.name=="red_top"||mesh.name=="red_top_1"){
+                  mesh.position.set(45,  -2680,  -8560)
+                    mesh.scale.set(2.5,2.5,2.5)
+                }
+              }
+
+              ///////////////////////////////////////////////////////
 
               if (true) {
                 // //35、36、47、43
@@ -220,6 +297,7 @@ export class VrSpace {
                   // }
                   if (node.material) {
                     node.material.envMapIntensity = 0.1
+                    node.material.lightMapIntensity=7
                     node.material.needUpdate = true
 
                     if (
@@ -237,25 +315,29 @@ export class VrSpace {
 
                     }
                     if(node.name=="bowl_red_02"){
-                       node.visible=false
+                   //   _self.groups.push(node)
+                      console.log(node)
+                      node.visible=false
                     }
                     if(node.name=="bowl_red_01"){
+                      console.log(node)
+                     // _self.groups.push(node)
                       node.visible=false
                     }
                     if(node.name=="red_top"){
+                      console.log(node)
+                      _self.groups.push(node)
                       node.visible=false
                     }
                     if(node.name=="large_sign"){
+                      console.log(node)
+                     // _self.groups.push(node)
                       node.visible=false
-                    }
-
-                    if (node.name == "red_top") {
-                      _self.groups.push(node)
                     }
                   }
                 })
               }
-              _self.createBVH(scene)
+             _self.createBVH(scene)
               MMOPlayerMgr.SetSpawnPoints(null)
             },
             function (xhr) { },
