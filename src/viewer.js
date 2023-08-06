@@ -92,7 +92,7 @@ export class Viewer {
     
     
     this.autoMove=this.wander2()
-    new Blur(()=>{
+    // new Blur(()=>{
       // var myVideoManager = new VideoManager();
       // myVideoManager.init();
       // myVideoManager.setPlay()
@@ -103,7 +103,7 @@ export class Viewer {
       video.play()
       audio.play()
       _self.isPlayAudio = true
-    })
+    // })
     
 
 
